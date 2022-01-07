@@ -1,5 +1,6 @@
 from utils import *
 from decoder import decoder
+from scipy.optimize import fsolve
 import time
 
 q = []
@@ -8,11 +9,20 @@ for i in range(10):
 
 simulator = cirq.DensityMatrixSimulator(dtype=np.complex128)
 
+# threshold
+# 1L: 0.00046302
+# +L: 0.00011492
+
 
 def main():
-    theta = np.pi/2
-    phi = np.pi/2
+    theta = 0
+    phi = 0
     print(theta, phi)
+    st = time.time()
+    find_threshold(theta, phi)
+    ed = time.time()
+    print("Time:", ed-st)
+    exit()
     init = initialize(theta, phi)
     init_bloch = get_bloch_vector(init)
     p_noise = [4.5, 4.4, 4.3, 4.2, 4.1, 4.0, 3.9, 3.8, 3.7, 3.6, 3.5, 3.4, 3.3]
@@ -26,6 +36,24 @@ def main():
         infide_arr.append(infide)
         print(10 ** (-p), infide, fin_bloch)
     print(infide_arr)
+
+
+def find_threshold(theta, phi):
+    def func(p):
+        print(p)
+        if p <= 10**(-8):
+            return 0
+        init = initialize(theta, phi)
+        init_bloch = get_bloch_vector(init)
+        fin = extended_memory(init, p_noise=p)
+        fin_bloch = get_bloch_vector(fin)
+        infide = infidelity_bloch(fin_bloch, init_bloch)
+        diff = unencoded_infidelity(theta, phi, p) - infide
+        return diff
+
+    th = fsolve(func, np.array([10**(-3)]))
+    print(th)
+    return th
 
 
 def extended_memory(init_state, p_noise=0.):
