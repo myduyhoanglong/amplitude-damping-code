@@ -33,12 +33,12 @@ np.set_printoptions(threshold=sys.maxsize)
 #     print("Count: %d/%d, Time: %f" % (count, n, end - start))
 
 def main():
-    power = 4
+    power = 3.8
     p = multiprocessing.Value('d', 10 ** (-power))
     count1 = multiprocessing.Value('i', 0)
     count2 = multiprocessing.Value('i', 0)
-    N = 100
-    n_per_pool = 1
+    N = 10000
+    n_per_pool = 50
     n_pools = int(N / n_per_pool)
     jobs = []
 
@@ -70,7 +70,7 @@ def one_run(p, count1, count2, power):
     simulator = cirq.DensityMatrixSimulator(dtype=np.complex128)
 
     try:
-        perfect_state, r, theta, phi = initialize_randomly()
+        perfect_state, r, theta, phi = initialize(np.pi/2, 0)
         noisy_state1, log1 = simulate(simulator, q, add_qubits(perfect_state, 6), p_noise=p)
         noisy_state2 = rest(simulator, q, noisy_state1, p_noise=p)
         noisy_state3, log3 = simulate(simulator, q, add_qubits(noisy_state2, 6), p_noise=p)
@@ -90,19 +90,17 @@ def one_run(p, count1, count2, power):
         infide_middle_bloch = infidelity_bloch(in_bloch, perfect_bloch)
         unencoded_infide = unencoded_infidelity_mix(r, theta, phi, p)
 
-        print((r, theta, phi))
-        print(perfect_bloch, in_bloch, ec_bloch)
-        print(infide_perfect, infide_perfect_bloch)
-        print(infide, infide_bloch)
-        print(infide_middle, infide_middle_bloch)
-        print(unencoded_infide)
-        print(log1, log3, logid1, logid3)
+        # print((r, theta, phi))
+        # print(perfect_bloch, in_bloch, ec_bloch)
+        # print(infide_perfect, infide_perfect_bloch)
+        # print(infide, infide_bloch)
+        # print(infide_middle, infide_middle_bloch)
+        # print(unencoded_infide)
+        # print(log1, log3, logid1, logid3)
     except Exception as e:
-        # print(noisy_state)
-        print(e)
         infide = 1000
 
-    filename = './data_mix_' + str(int(power * 100)) + '.txt'
+    filename = './dat/data_plus_' + str(int(power * 100)) + '.txt'
     # filename = './test1L.txt'
     with open(filename, 'a') as writer:
         writer.write(
@@ -117,12 +115,13 @@ def one_run(p, count1, count2, power):
 
 
 def initialize(theta, phi, ancilla=0):
+    r = 1
     nx = np.sin(theta) * np.cos(phi)
     ny = np.sin(theta) * np.sin(phi)
     nz = np.cos(theta)
     s = np.copy(0.5 * (idt + nx * sigma_x + ny * sigma_y + nz * sigma_z))
     s = add_qubits(s, ancilla)
-    return s, theta, phi
+    return s, r, theta, phi
 
 
 def initialize_randomly(ancilla=0):

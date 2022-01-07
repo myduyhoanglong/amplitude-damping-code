@@ -3,10 +3,11 @@ import cirq
 import itertools
 from scipy.linalg import sqrtm, eigvalsh
 
+
 # basis vectors: 0000, 0001, 0010, 0011, ...
 u = [np.array([1., 0]), np.array([0, 1])]
-sx = np.outer(u[0], u[1]) + np.outer(u[1], u[0])
-sz = np.outer(u[0], u[0]) - np.outer(u[1], u[1])
+sx = np.array([[0., 1.], [1., 0.]])
+sz = np.array([[1., 0], [0, -1.]])
 p0 = np.outer(u[0], u[0])
 p1 = np.outer(u[1], u[1])
 basis = []
@@ -80,14 +81,14 @@ def log_to_str(log):
 def list_to_str(l):
     s = '['
     for i in range(len(l) - 1):
-        s = s + str(l[i]) + ','
+        s = s + str(l[i]) + ', '
     s = s + str(l[-1]) + ']'
     return s
 
 
 def make_str(p, perfect_bloch, in_bloch, ec_bloch, infide_perfect, infide_perfect_bloch, infide, infide_bloch,
              infide_middle, infide_middle_bloch, unencoded_infide, log1, log3, logid1, logid3):
-    out = "p:%E|perfect:%s|ec1:%s|ec2:%s|if30:%E|if30_b:%E|if31:%E|if31_b:%E|if10:%E|if10_b:%E|if_raw:%E|log1:%s|log3:%s|logid1:%s|logid3:%s\n" % (
+    out = "p:%E, perfect:%s, ec1:%s, ec2:%s, if30:%E, if30_b:%E, if31:%E, if31_b:%E, if10:%E, if10_b:%E, if_raw:%E, log1:%s, log3:%s, logid1:%s, logid3:%s\n" % (
         p, list_to_str(perfect_bloch), list_to_str(in_bloch), list_to_str(ec_bloch), infide_perfect,
         infide_perfect_bloch,
         infide, infide_bloch, infide_middle, infide_middle_bloch, unencoded_infide, log_to_str(log1), log_to_str(log3),
@@ -114,7 +115,7 @@ def get_bloch_vector(s):
             phi = np.pi / 2
     else:
         if nx > 0:
-            if ny > 0:
+            if ny >= 0:
                 phi = np.arctan(ny / nx)
             else:
                 phi = np.arctan(ny / nx) + 2 * np.pi
